@@ -1,0 +1,18 @@
+# Windows-specific requirements for OverlayPy
+# Note: tkinter comes built-in with Python on Windows
+
+# Core dependencies
+screeninfo==0.8.1
+
+# Windows-specific packages (not needed on Windows, but kept for compatibility)
+# pyobjc packages are macOS-only and will be skipped on Windows
+Cython==3.1.3; platform_system != "Windows"
+pyobjc-core==11.1; sys_platform == "darwin"
+pyobjc-framework-Cocoa==11.1; sys_platform == "darwin"
+
+# Development tools (optional)
+# Uncomment these if you want to run linting/testing on Windows
+# pylint>=3.0.0
+# flake8>=6.0.0
+# black>=23.0.0
+# pytest>=7.0.0

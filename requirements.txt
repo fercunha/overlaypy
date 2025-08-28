@@ -1,4 +1,7 @@
-Cython==3.1.3
-pyobjc-core==11.1
-pyobjc-framework-Cocoa==11.1
+# Core dependency for all platforms
 screeninfo==0.8.1
+
+# macOS-specific dependencies (will be ignored on other platforms)
+Cython==3.1.3; sys_platform == "darwin"
+pyobjc-core==11.1; sys_platform == "darwin" 
+pyobjc-framework-Cocoa==11.1; sys_platform == "darwin"

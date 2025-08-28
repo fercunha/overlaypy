@@ -31,11 +31,25 @@ class OverlayApp:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        # Bind mousewheel to canvas
+        # Bind mousewheel to canvas (cross-platform)
         def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            # Windows and macOS use different scroll directions and deltas
+            if platform.system() == "Windows":
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            elif platform.system() == "Darwin":  # macOS
+                canvas.yview_scroll(int(-1 * event.delta), "units")
+            else:  # Linux
+                if event.num == 4:
+                    canvas.yview_scroll(-1, "units")
+                elif event.num == 5:
+                    canvas.yview_scroll(1, "units")
 
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        # Bind mouse wheel events for different platforms
+        if platform.system() == "Linux":
+            canvas.bind_all("<Button-4>", _on_mousewheel)
+            canvas.bind_all("<Button-5>", _on_mousewheel)
+        else:
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
         # Use scrollable_frame as the parent for all widgets
         container = scrollable_frame
@@ -318,9 +332,15 @@ class OverlayApp:
 
         # Make overlay click-through (Windows only)
         if platform.system() == "Windows":
-            hwnd = ctypes.windll.user32.GetParent(self.overlay.winfo_id())
-            style = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
-            ctypes.windll.user32.SetWindowLongW(hwnd, -20, style | 0x80000 | 0x20)
+            try:
+                hwnd = ctypes.windll.user32.GetParent(self.overlay.winfo_id())
+                if hwnd:
+                    style = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
+                    # WS_EX_LAYERED | WS_EX_TRANSPARENT
+                    ctypes.windll.user32.SetWindowLongW(hwnd, -20, style | 0x80000 | 0x20)
+            except Exception as e:
+                # Click-through feature failed, but overlay still works
+                print(f"Note: Click-through feature unavailable: {e}")
 
         self.overlay_visible = True
         self.toggle_btn.config(text="Hide Overlay", bg="orange", fg="black")

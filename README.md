@@ -84,6 +84,36 @@ Options:
   --clean        Clean install (remove existing venv)
 ```
 
+### 🪟 Windows Installation
+
+For Windows users, we provide dedicated installation scripts:
+
+#### **Option 1: Batch Script (Easiest)**
+```cmd
+git clone https://github.com/fercunha/overlaypy.git
+cd overlaypy
+install.bat
+```
+
+#### **Option 2: PowerShell Script (Advanced)**
+```powershell
+git clone https://github.com/fercunha/overlaypy.git
+cd overlaypy
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+#### **Running on Windows**
+- **Quick start:** Double-click `run-overlay.bat`
+- **Manual:** `localvenv\Scripts\activate` then `python overlay.py`
+
+#### **Windows Features**
+- ✅ **Click-through overlays** - Mouse clicks pass through overlay
+- ✅ **High DPI support** - Scales properly on high-resolution displays  
+- ✅ **Multi-monitor support** - Full support for multiple displays
+- ✅ **Windows integration** - Native Windows behavior
+
+📋 **Troubleshooting Windows issues?** See [WINDOWS.md](WINDOWS.md) for detailed solutions.
+
 ### 📱 Manual Installation
 
 If you prefer to install manually or the script doesn't work for your system:
@@ -96,8 +126,13 @@ If you prefer to install manually or the script doesn't work for your system:
 
 2. **Set up virtual environment** (recommended)
    ```bash
+   # macOS/Linux
    python3 -m venv localvenv
-   source localvenv/bin/activate  # On Windows: localvenv\Scripts\activate
+   source localvenv/bin/activate
+   
+   # Windows
+   python -m venv localvenv
+   localvenv\Scripts\activate
    ```
 
 3. **Install dependencies**
