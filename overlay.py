@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import ctypes
 import platform
 from screeninfo import get_monitors
@@ -7,32 +8,62 @@ class OverlayApp:
     def __init__(self, master):
         self.master = master
         master.title("Overlay Controller")
-        master.geometry("400x400")
+        master.geometry("450x500")
         master.attributes("-topmost", True)  # Keep main window always on top
 
+        # Create main frame with scrollbar
+        main_frame = tk.Frame(master)
+        main_frame.pack(fill=tk.BOTH, expand=1)
+
+        # Create canvas and scrollbar
+        canvas = tk.Canvas(main_frame)
+        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
+
+        # Configure canvas
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Pack canvas and scrollbar
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Bind mousewheel to canvas
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        # Use scrollable_frame as the parent for all widgets
+        container = scrollable_frame
+
         # --- Message Input ---
-        tk.Label(master, text="Message:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
-        self.entry = tk.Entry(master, width=40, font=("Arial", 14))
+        tk.Label(container, text="Message:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
+        self.entry = tk.Entry(container, width=40, font=("Arial", 14))
         self.entry.pack(padx=10, pady=(0, 10))
         self.entry.insert(0, "Your message here...")
 
         # --- Padding Input ---
-        tk.Label(master, text="Padding (pixels):", font=("Arial", 12, "bold")).pack(pady=(10, 2))
-        self.padding_entry = tk.Entry(master, width=10, font=("Arial", 14))
+        tk.Label(container, text="Padding (pixels):", font=("Arial", 12, "bold")).pack(pady=(10, 2))
+        self.padding_entry = tk.Entry(container, width=10, font=("Arial", 14))
         self.padding_entry.pack(padx=10, pady=(0, 10))
         self.padding_entry.insert(0, "40")
 
         # --- Font Size Selection ---
-        tk.Label(master, text="Font Size:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
-        self.font_size_var = tk.StringVar(master)
-        font_sizes = ["12", "18", "24", "30", "36", "42", "48", "60", "72", "84", "96"]
+        tk.Label(container, text="Font Size:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
+        self.font_size_var = tk.StringVar(container)
+        font_sizes = ["12", "18", "24", "30", "36", "42", "48", "60", "72", "84", "96", "120", "144", "168", "192", "216", "240"]
         self.font_size_var.set("36")  # Default font size
-        self.font_size_menu = tk.OptionMenu(master, self.font_size_var, *font_sizes)
+        self.font_size_menu = tk.OptionMenu(container, self.font_size_var, *font_sizes)
         self.font_size_menu.config(width=10)
         self.font_size_menu.pack(pady=(0, 10))
 
         # --- Timer Settings ---
-        timer_frame = tk.Frame(master)
+        timer_frame = tk.Frame(container)
         timer_frame.pack(pady=(10, 10))
         
         self.timer_enabled = tk.BooleanVar(value=True)
@@ -47,9 +78,9 @@ class OverlayApp:
         tk.Label(timer_frame, text="seconds", font=("Arial", 11)).pack(side=tk.LEFT)
 
         # --- Monitor Selection ---
-        tk.Label(master, text="Select Monitor:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
+        tk.Label(container, text="Select Monitor:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
         self.monitors = get_monitors()
-        self.monitor_var = tk.StringVar(master)
+        self.monitor_var = tk.StringVar(container)
         
         # Create monitor names for dropdown
         monitor_names = []
@@ -60,18 +91,18 @@ class OverlayApp:
                 monitor_names.append(f"Monitor {i+1} ({monitor.width}x{monitor.height})")
         
         self.monitor_var.set(monitor_names[0])
-        self.monitor_menu = tk.OptionMenu(master, self.monitor_var, *monitor_names)
+        self.monitor_menu = tk.OptionMenu(container, self.monitor_var, *monitor_names)
         self.monitor_menu.config(width=35)
         self.monitor_menu.pack(pady=(0, 15))
 
         # --- Buttons ---
-        self.toggle_btn = tk.Button(master, text="Show Overlay", font=("Arial", 12, "bold"),
+        self.toggle_btn = tk.Button(container, text="Show Overlay", font=("Arial", 12, "bold"),
                                     bg="lightgreen", fg="black", command=self.toggle_overlay)
         self.toggle_btn.pack(pady=5)
 
-        self.quit_btn = tk.Button(master, text="Quit", font=("Arial", 12),
+        self.quit_btn = tk.Button(container, text="Quit", font=("Arial", 12),
                                   bg="lightcoral", fg="black", command=master.quit)
-        self.quit_btn.pack(pady=5)
+        self.quit_btn.pack(pady=(5, 20))  # Extra bottom padding
 
         # Overlay state
         self.overlay = None
