@@ -1,0 +1,31 @@
+# Docker-based Windows .exe builder for OverlayPy
+# This allows building Windows executables from any platform
+
+FROM python:3.11-windowsservercore
+
+# Set working directory
+WORKDIR /app
+
+# Install Wine for cross-compilation (if using Linux base)
+# For Windows container, this step is not needed
+
+# Copy application files
+COPY overlay.py .
+COPY requirements.txt .
+COPY README.md .
+COPY WINDOWS.md .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install PyInstaller
+RUN pip install pyinstaller pillow
+
+# Create build script
+RUN echo @echo off > build.bat && \
+    echo python -m PyInstaller --onefile --windowed --name OverlayPy overlay.py >> build.bat
+
+# Build the executable
+RUN build.bat
+
+# The output will be in dist/OverlayPy.exe
