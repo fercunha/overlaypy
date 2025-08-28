@@ -7,7 +7,7 @@ class OverlayApp:
     def __init__(self, master):
         self.master = master
         master.title("Overlay Controller")
-        master.geometry("400x350")
+        master.geometry("400x400")
         master.attributes("-topmost", True)  # Keep main window always on top
 
         # --- Message Input ---
@@ -21,6 +21,15 @@ class OverlayApp:
         self.padding_entry = tk.Entry(master, width=10, font=("Arial", 14))
         self.padding_entry.pack(padx=10, pady=(0, 10))
         self.padding_entry.insert(0, "40")
+
+        # --- Font Size Selection ---
+        tk.Label(master, text="Font Size:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
+        self.font_size_var = tk.StringVar(master)
+        font_sizes = ["12", "18", "24", "30", "36", "42", "48", "60", "72", "84", "96"]
+        self.font_size_var.set("36")  # Default font size
+        self.font_size_menu = tk.OptionMenu(master, self.font_size_var, *font_sizes)
+        self.font_size_menu.config(width=10)
+        self.font_size_menu.pack(pady=(0, 10))
 
         # --- Timer Settings ---
         timer_frame = tk.Frame(master)
@@ -103,11 +112,17 @@ class OverlayApp:
             self.overlay.attributes("-topmost", True)
             self.overlay.configure(bg="black")
 
+            # Get font size from user input
+            try:
+                font_size = int(self.font_size_var.get())
+            except ValueError:
+                font_size = 36  # default font size
+
             # Label (BOLD, WHITE on BLACK)
             self.label = tk.Label(
                 self.overlay,
                 text=self.entry.get(),
-                font=("Arial", 36, "bold"),
+                font=("Arial", font_size, "bold"),
                 fg="white",
                 bg="black"
             )
@@ -120,8 +135,17 @@ class OverlayApp:
                 
             self.label.pack(padx=padding, pady=padding)
 
-        # Update text and padding
+        # Update text, font size, and padding
         self.label.config(text=self.entry.get())
+        
+        # Get current font size
+        try:
+            font_size = int(self.font_size_var.get())
+        except ValueError:
+            font_size = 36
+            
+        # Update font size
+        self.label.config(font=("Arial", font_size, "bold"))
         
         # Get current padding value
         try:
