@@ -76,6 +76,39 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Ask if user wants to install build dependencies
+echo.
+choice /C YN /M "Do you want to install build dependencies for creating executables? (Y/N)"
+if errorlevel 2 goto :skip_build_deps
+
+echo [INFO] Installing build dependencies...
+pip install pyinstaller>=6.0.0
+if errorlevel 1 (
+    echo [WARNING] Failed to install PyInstaller
+) else (
+    echo [SUCCESS] PyInstaller installed successfully
+)
+
+pip install pillow>=10.0.0
+if errorlevel 1 (
+    echo [WARNING] Failed to install Pillow (icon support)
+) else (
+    echo [SUCCESS] Pillow installed successfully
+)
+
+pip install wheel setuptools
+if errorlevel 1 (
+    echo [WARNING] Failed to install build tools
+) else (
+    echo [SUCCESS] Build tools installed successfully
+)
+
+echo [INFO] Build dependencies installation completed
+echo You can now use build-windows.bat to create executables
+echo.
+
+:skip_build_deps
+
 REM Test installation
 echo [INFO] Testing installation...
 python -c "import tkinter; import screeninfo; print('All dependencies installed successfully')"

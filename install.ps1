@@ -135,6 +135,51 @@ if (Test-Path "requirements.txt") {
     & "localvenv\Scripts\pip.exe" install screeninfo Cython pyobjc-core pyobjc-framework-Cocoa
 }
 
+# Ask about build dependencies
+Write-Host ""
+$buildChoice = Read-Host "Do you want to install build dependencies for creating executables? (y/N)"
+if ($buildChoice -match "^[Yy]") {
+    Write-Info "Installing build dependencies..."
+    
+    $buildDeps = @(
+        "pyinstaller>=6.0.0",
+        "pillow>=10.0.0", 
+        "wheel",
+        "setuptools"
+    )
+    
+    foreach ($dep in $buildDeps) {
+        try {
+            & "localvenv\Scripts\pip.exe" install $dep
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "Installed $dep"
+            } else {
+                Write-Warning "Failed to install $dep"
+            }
+        }
+        catch {
+            Write-Warning "Exception installing $dep`: $_"
+        }
+    }
+    
+    # Install optional dependencies
+    $optionalDeps = @("auto-py-to-exe>=2.38.0")
+    foreach ($dep in $optionalDeps) {
+        try {
+            & "localvenv\Scripts\pip.exe" install $dep
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "Installed optional tool: $dep"
+            }
+        }
+        catch {
+            Write-Info "Optional tool $dep not installed"
+        }
+    }
+    
+    Write-Success "Build dependencies installation completed"
+    Write-Host "You can now use build-windows.ps1 or build-windows.bat to create executables" -ForegroundColor Cyan
+}
+
 # Test installation
 Write-Info "Testing installation..."
 $testResult = & "localvenv\Scripts\python.exe" -c "import tkinter; import screeninfo; print('SUCCESS: All dependencies installed')" 2>&1

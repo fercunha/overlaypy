@@ -15,21 +15,76 @@ def install_build_dependencies():
     """Install PyInstaller and other build dependencies."""
     print("📦 Installing build dependencies...")
     
+    # First upgrade pip
+    try:
+        subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], 
+                     check=True, capture_output=True, text=True)
+        print("✅ Upgraded pip")
+    except subprocess.CalledProcessError as e:
+        print(f"⚠️  Warning: Failed to upgrade pip: {e}")
+    
+    # Install runtime dependencies first
+    if Path("requirements.txt").exists():
+        try:
+            subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], 
+                         check=True, capture_output=True, text=True)
+            print("✅ Installed runtime dependencies from requirements.txt")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to install runtime dependencies: {e}")
+            return False
+    else:
+        print("⚠️  No requirements.txt found, installing basic dependencies...")
+        try:
+            subprocess.run([sys.executable, "-m", "pip", "install", "screeninfo"], 
+                         check=True, capture_output=True, text=True)
+            print("✅ Installed basic dependencies")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to install basic dependencies: {e}")
+            return False
+    
+    # Build dependencies
     dependencies = [
-        "pyinstaller>=5.13.0",
-        "auto-py-to-exe>=2.38.0",  # Optional GUI tool
+        "pyinstaller>=6.0.0",
         "pillow>=10.0.0",          # For icon support
+        "wheel",                   # Build tools
+        "setuptools",              # Build tools
     ]
     
+    # Optional dependencies
+    optional_dependencies = [
+        "auto-py-to-exe>=2.38.0",  # Optional GUI tool
+        "upx-ucl",                 # Optional compression (if available)
+    ]
+    
+    # Install required dependencies
     for dep in dependencies:
+        try:
+            result = subprocess.run([sys.executable, "-m", "pip", "install", dep], 
+                                  check=True, capture_output=True, text=True)
+            print(f"✅ Installed {dep}")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to install {dep}: {e}")
+            if "pyinstaller" in dep.lower():
+                return False  # PyInstaller is critical
+            
+    # Install optional dependencies
+    for dep in optional_dependencies:
         try:
             subprocess.run([sys.executable, "-m", "pip", "install", dep], 
                          check=True, capture_output=True, text=True)
             print(f"✅ Installed {dep}")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to install {dep}: {e}")
-            return False
+            print(f"⚠️  Optional dependency {dep} not installed: {e}")
     
+    # Verify PyInstaller installation
+    try:
+        result = subprocess.run([sys.executable, "-m", "PyInstaller", "--version"], 
+                              capture_output=True, text=True, check=True)
+        print(f"✅ PyInstaller version: {result.stdout.strip()}")
+    except subprocess.CalledProcessError:
+        print("❌ PyInstaller verification failed")
+        return False
+
     return True
 
 

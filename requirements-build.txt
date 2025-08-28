@@ -1,0 +1,16 @@
+# Build Dependencies for OverlayPy
+# Use this file to install only the dependencies needed for building executables
+
+# Core build tool
+pyinstaller>=6.0.0
+
+# Icon support
+pillow>=10.0.0
+
+# Build tools
+wheel>=0.41.0
+setuptools>=68.0.0
+
+# Optional tools (install separately if needed)
+# auto-py-to-exe>=2.38.0  # GUI for PyInstaller
+# upx-ucl                 # Executable compression (if available)
