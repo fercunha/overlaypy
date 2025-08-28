@@ -23,12 +23,19 @@ def setup_logging():
     log_filename = os.path.join(log_dir, f"overlaypy_{timestamp}.log")
     
     # Configure logging with multiple levels
+    # Use a StreamHandler with UTF-8 encoding for console output
+    console_handler = logging.StreamHandler(sys.stdout)
+    try:
+        console_handler.setStream(open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1))
+    except Exception:
+        # Fallback for environments where fileno() is not available
+        pass
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
         handlers=[
             logging.FileHandler(log_filename, encoding='utf-8'),
-            logging.StreamHandler(sys.stdout)  # Also log to console
+            console_handler
         ]
     )
     
