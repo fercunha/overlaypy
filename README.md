@@ -222,9 +222,48 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ### Development Setup
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test thoroughly on your platform
-5. Submit a pull request
+3. Install development dependencies: `pip install -r requirements-dev.txt`
+4. Make your changes
+5. Run code quality checks: `./check-code.sh`
+6. Test thoroughly on your platform
+7. Submit a pull request
+
+### Code Quality Tools
+This project uses several tools to maintain code quality:
+
+- **Black**: Code formatting
+- **isort**: Import sorting
+- **flake8**: Linting and style checking
+- **pylint**: Comprehensive code analysis
+- **mypy**: Type checking
+- **bandit**: Security vulnerability scanning
+- **safety**: Dependency vulnerability checking
+- **pytest**: Unit testing
+- **radon**: Code complexity analysis
+
+### Running Quality Checks Locally
+```bash
+# Run all checks at once
+./check-code.sh
+
+# Or run individual tools
+black .                    # Format code
+isort .                    # Sort imports
+flake8 .                   # Lint code
+pylint *.py               # Comprehensive analysis
+mypy .                    # Type checking
+bandit -r .               # Security check
+safety check              # Dependency vulnerabilities
+pytest                    # Run tests
+```
+
+### GitHub Actions
+The repository includes comprehensive CI/CD workflows:
+- **Code Quality & Security**: Runs on every push and PR
+- **Multi-Python Testing**: Tests against Python 3.8-3.12
+- **Automated Security Scanning**: Bandit and Safety checks
+- **Code Complexity Analysis**: Radon, Xenon, and Vulture
+- **Artifact Upload**: Security reports available for download
 
 ## 📝 License
 

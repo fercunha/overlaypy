@@ -4,6 +4,7 @@ import ctypes
 import platform
 from screeninfo import get_monitors
 
+
 class OverlayApp:
     def __init__(self, master):
         self.master = master
@@ -21,10 +22,7 @@ class OverlayApp:
         scrollable_frame = tk.Frame(canvas)
 
         # Configure canvas
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
+        scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
@@ -35,7 +33,8 @@ class OverlayApp:
 
         # Bind mousewheel to canvas
         def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
         canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
         # Use scrollable_frame as the parent for all widgets
@@ -56,13 +55,31 @@ class OverlayApp:
         font_col.pack(side=tk.LEFT, padx=(0, 15), fill=tk.X, expand=True)
         tk.Label(font_col, text="Font Size:", font=("Arial", 11, "bold")).pack()
         self.font_size_var = tk.StringVar(container)
-        font_sizes = ["12", "18", "24", "30", "36", "42", "48", "60", "72", "84", "96", "120", "144", "168", "192", "216", "240"]
+        font_sizes = [
+            "12",
+            "18",
+            "24",
+            "30",
+            "36",
+            "42",
+            "48",
+            "60",
+            "72",
+            "84",
+            "96",
+            "120",
+            "144",
+            "168",
+            "192",
+            "216",
+            "240",
+        ]
         self.font_size_var.set("36")  # Default font size
         self.font_size_menu = tk.OptionMenu(font_col, self.font_size_var, *font_sizes, command=self.on_setting_change)
         self.font_size_menu.config(width=8)
         self.font_size_menu.pack(fill=tk.X)
 
-        # Position Column  
+        # Position Column
         position_col = tk.Frame(controls_frame)
         position_col.pack(side=tk.LEFT, padx=(0, 15), fill=tk.X, expand=True)
         tk.Label(position_col, text="Position:", font=("Arial", 11, "bold")).pack()
@@ -77,55 +94,60 @@ class OverlayApp:
         padding_col = tk.Frame(controls_frame)
         padding_col.pack(side=tk.LEFT, fill=tk.X, expand=True)
         tk.Label(padding_col, text="Padding (px):", font=("Arial", 11, "bold")).pack()
-        self.padding_entry = tk.Entry(padding_col, width=8, font=("Arial", 12), justify='center')
+        self.padding_entry = tk.Entry(padding_col, width=8, font=("Arial", 12), justify="center")
         self.padding_entry.pack(fill=tk.X)
         self.padding_entry.insert(0, "40")
         # Bind real-time updates for padding
-        self.padding_entry.bind('<KeyRelease>', self.on_setting_change)
+        self.padding_entry.bind("<KeyRelease>", self.on_setting_change)
 
         # --- Timer Settings ---
         timer_frame = tk.Frame(container)
         timer_frame.pack(pady=(10, 10))
-        
+
         self.timer_enabled = tk.BooleanVar(value=True)
-        self.timer_checkbox = tk.Checkbutton(timer_frame, text="Auto-hide after", 
-                                           variable=self.timer_enabled, font=("Arial", 11),
-                                           command=self.on_timer_change)
+        self.timer_checkbox = tk.Checkbutton(
+            timer_frame, text="Auto-hide after", variable=self.timer_enabled, font=("Arial", 11), command=self.on_timer_change
+        )
         self.timer_checkbox.pack(side=tk.LEFT)
-        
+
         self.timer_entry = tk.Entry(timer_frame, width=5, font=("Arial", 12))
         self.timer_entry.pack(side=tk.LEFT, padx=(5, 2))
         self.timer_entry.insert(0, "60")
         # Bind real-time updates for timer
-        self.timer_entry.bind('<KeyRelease>', self.on_timer_change)
-        
+        self.timer_entry.bind("<KeyRelease>", self.on_timer_change)
+
         tk.Label(timer_frame, text="seconds", font=("Arial", 11)).pack(side=tk.LEFT)
 
         # --- Monitor Selection ---
         tk.Label(container, text="Select Monitor:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
         self.monitors = get_monitors()
         self.monitor_var = tk.StringVar(container)
-        
+
         # Create monitor names for dropdown
         monitor_names = []
         for i, monitor in enumerate(self.monitors):
-            if hasattr(monitor, 'name') and monitor.name:
+            if hasattr(monitor, "name") and monitor.name:
                 monitor_names.append(f"{monitor.name} ({monitor.width}x{monitor.height})")
             else:
-                monitor_names.append(f"Monitor {i+1} ({monitor.width}x{monitor.height})")
-        
+                monitor_names.append(f"Monitor {i + 1} ({monitor.width}x{monitor.height})")
+
         self.monitor_var.set(monitor_names[0])
         self.monitor_menu = tk.OptionMenu(container, self.monitor_var, *monitor_names, command=self.on_setting_change)
         self.monitor_menu.config(width=35)
         self.monitor_menu.pack(pady=(0, 15))
 
         # --- Buttons ---
-        self.toggle_btn = tk.Button(container, text="Show Overlay", font=("Arial", 12, "bold"),
-                                    bg="lightgreen", fg="black", command=self.toggle_overlay)
+        self.toggle_btn = tk.Button(
+            container,
+            text="Show Overlay",
+            font=("Arial", 12, "bold"),
+            bg="lightgreen",
+            fg="black",
+            command=self.toggle_overlay,
+        )
         self.toggle_btn.pack(pady=5)
 
-        self.quit_btn = tk.Button(container, text="Quit", font=("Arial", 12),
-                                  bg="lightcoral", fg="black", command=master.quit)
+        self.quit_btn = tk.Button(container, text="Quit", font=("Arial", 12), bg="lightcoral", fg="black", command=master.quit)
         self.quit_btn.pack(pady=(5, 20))  # Extra bottom padding
 
         # Overlay state
@@ -145,7 +167,7 @@ class OverlayApp:
             if self.timer_job:
                 self.master.after_cancel(self.timer_job)
                 self.timer_job = None
-            
+
             # Set new timer if enabled
             if self.timer_enabled.get():
                 try:
@@ -163,17 +185,17 @@ class OverlayApp:
         # Find the selected monitor
         selected_monitor = None
         selected_text = self.monitor_var.get()
-        
+
         for i, monitor in enumerate(self.monitors):
-            if hasattr(monitor, 'name') and monitor.name:
+            if hasattr(monitor, "name") and monitor.name:
                 monitor_name = f"{monitor.name} ({monitor.width}x{monitor.height})"
             else:
                 monitor_name = f"Monitor {i+1} ({monitor.width}x{monitor.height})"
-            
+
             if monitor_name == selected_text:
                 selected_monitor = monitor
                 break
-        
+
         if selected_monitor is None:
             selected_monitor = self.monitors[0]
 
@@ -182,28 +204,28 @@ class OverlayApp:
             font_size = int(self.font_size_var.get())
         except ValueError:
             font_size = 36
-            
+
         # Update font size
         self.label.config(font=("Arial", font_size, "bold"))
-        
+
         # Get current padding value
         try:
             padding = int(self.padding_entry.get())
         except ValueError:
             padding = 40
-            
+
         # Update padding
         self.label.pack_configure(padx=padding, pady=padding)
-        
+
         # Calculate size based on text content and padding
         self.overlay.update_idletasks()  # Force update to get accurate measurements
         req_width = self.label.winfo_reqwidth() + (padding * 2)
         req_height = self.label.winfo_reqheight() + (padding * 2)
-        
+
         # Position overlay based on selected corner
         margin = 20  # Margin from screen edges
         corner = self.corner_var.get()
-        
+
         if corner == "Bottom Left":
             x_pos = selected_monitor.x + margin
             y_pos = selected_monitor.y + selected_monitor.height - req_height - margin
@@ -219,7 +241,7 @@ class OverlayApp:
         else:  # Default to bottom left if something goes wrong
             x_pos = selected_monitor.x + margin
             y_pos = selected_monitor.y + selected_monitor.height - req_height - margin
-        
+
         self.overlay.geometry(f"{req_width}x{req_height}+{x_pos}+{y_pos}")
         # Force immediate update to ensure positioning takes effect
         self.overlay.update()
@@ -238,17 +260,17 @@ class OverlayApp:
         # Find the selected monitor by matching the dropdown selection
         selected_monitor = None
         selected_text = self.monitor_var.get()
-        
+
         for i, monitor in enumerate(self.monitors):
-            if hasattr(monitor, 'name') and monitor.name:
+            if hasattr(monitor, "name") and monitor.name:
                 monitor_name = f"{monitor.name} ({monitor.width}x{monitor.height})"
             else:
                 monitor_name = f"Monitor {i+1} ({monitor.width}x{monitor.height})"
-            
+
             if monitor_name == selected_text:
                 selected_monitor = monitor
                 break
-        
+
         if selected_monitor is None:
             selected_monitor = self.monitors[0]
 
@@ -268,21 +290,17 @@ class OverlayApp:
 
             # Label (BOLD, WHITE on BLACK)
             self.label = tk.Label(
-                self.overlay,
-                text=self.entry.get(),
-                font=("Arial", font_size, "bold"),
-                fg="white",
-                bg="black"
+                self.overlay, text=self.entry.get(), font=("Arial", font_size, "bold"), fg="white", bg="black"
             )
-            
+
             # Get padding from user input
             try:
                 padding = int(self.padding_entry.get())
             except ValueError:
                 padding = 40  # default padding if invalid input
-                
+
             self.label.pack(padx=padding, pady=padding)
-            
+
             # Position the overlay immediately when first created
             self.overlay.update_idletasks()
             self.update_overlay_appearance()
@@ -306,7 +324,7 @@ class OverlayApp:
 
         self.overlay_visible = True
         self.toggle_btn.config(text="Hide Overlay", bg="orange", fg="black")
-        
+
         # Set up auto-hide timer if enabled
         if self.timer_enabled.get():
             try:
@@ -325,7 +343,7 @@ class OverlayApp:
         if self.timer_job:
             self.master.after_cancel(self.timer_job)
             self.timer_job = None
-            
+
         if self.overlay:
             self.overlay.withdraw()
         self.overlay_visible = False
