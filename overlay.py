@@ -7,7 +7,7 @@ class OverlayApp:
     def __init__(self, master):
         self.master = master
         master.title("Overlay Controller")
-        master.geometry("400x300")
+        master.geometry("400x350")
         master.attributes("-topmost", True)  # Keep main window always on top
 
         # --- Message Input ---
@@ -21,6 +21,21 @@ class OverlayApp:
         self.padding_entry = tk.Entry(master, width=10, font=("Arial", 14))
         self.padding_entry.pack(padx=10, pady=(0, 10))
         self.padding_entry.insert(0, "40")
+
+        # --- Timer Settings ---
+        timer_frame = tk.Frame(master)
+        timer_frame.pack(pady=(10, 10))
+        
+        self.timer_enabled = tk.BooleanVar(value=True)
+        self.timer_checkbox = tk.Checkbutton(timer_frame, text="Auto-hide after", 
+                                           variable=self.timer_enabled, font=("Arial", 11))
+        self.timer_checkbox.pack(side=tk.LEFT)
+        
+        self.timer_entry = tk.Entry(timer_frame, width=5, font=("Arial", 12))
+        self.timer_entry.pack(side=tk.LEFT, padx=(5, 2))
+        self.timer_entry.insert(0, "60")
+        
+        tk.Label(timer_frame, text="seconds", font=("Arial", 11)).pack(side=tk.LEFT)
 
         # --- Monitor Selection ---
         tk.Label(master, text="Select Monitor:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
@@ -52,12 +67,17 @@ class OverlayApp:
         # Overlay state
         self.overlay = None
         self.overlay_visible = False
+        self.timer_job = None  # Store timer job reference
 
     def toggle_overlay(self):
         if self.overlay_visible:
             self.hide_overlay()
         else:
             self.show_overlay()
+
+    def auto_hide_overlay(self):
+        """Called by timer to automatically hide overlay"""
+        self.hide_overlay()
 
     def show_overlay(self):
         # Find the selected monitor by matching the dropdown selection
@@ -132,8 +152,26 @@ class OverlayApp:
 
         self.overlay_visible = True
         self.toggle_btn.config(text="Hide Overlay", bg="orange", fg="black")
+        
+        # Set up auto-hide timer if enabled
+        if self.timer_enabled.get():
+            try:
+                timer_seconds = int(self.timer_entry.get())
+                if timer_seconds > 0:
+                    # Cancel any existing timer
+                    if self.timer_job:
+                        self.master.after_cancel(self.timer_job)
+                    # Set new timer
+                    self.timer_job = self.master.after(timer_seconds * 1000, self.auto_hide_overlay)
+            except ValueError:
+                pass  # Invalid timer value, skip timer
 
     def hide_overlay(self):
+        # Cancel any pending timer
+        if self.timer_job:
+            self.master.after_cancel(self.timer_job)
+            self.timer_job = None
+            
         if self.overlay:
             self.overlay.withdraw()
         self.overlay_visible = False
