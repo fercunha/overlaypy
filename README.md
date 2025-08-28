@@ -17,18 +17,21 @@ A powerful and customizable Python application for creating text overlays on you
 ### 🖥️ **Multi-Monitor Support**
 - **Automatic monitor detection** - See all connected displays
 - **Smart monitor names** - Shows resolution and display names
-- **Bottom-left corner positioning** - Consistent placement with margin from edges
+- **Flexible corner positioning** - Choose from all 4 corners (default: bottom-left)
+- **Real-time monitor switching** - Change monitors and overlay moves instantly
 
 ### ⏱️ **Timer Controls**
 - **Auto-hide timer** - Set custom duration (default: 60 seconds)
 - **Timer toggle** - Enable/disable auto-hide functionality
 - **Manual control** - Show/hide overlay anytime with button click
+- **Real-time timer updates** - Changes to timer settings apply instantly while overlay is visible
 
 ### 🎛️ **Professional Interface**
 - **Always on top** - Control window stays accessible
-- **Scrollable interface** - Clean, organized layout
+- **Scrollable interface** - Clean, organized layout with side-by-side controls
 - **Intuitive controls** - Easy-to-use GUI with clear labels
-- **Real-time updates** - Changes apply immediately
+- **Real-time updates** - All settings (except message text) apply instantly
+- **Side-by-side layout** - Font size, position, and padding controls organized horizontally
 
 ### 🌐 **Cross-Platform**
 - **macOS** - Full support with native scrolling
@@ -122,29 +125,43 @@ pip install -r requirements.txt
 ### Basic Usage
 1. **Launch** the application: `python overlay.py`
 2. **Enter your message** in the text field
-3. **Select monitor** from the dropdown (if multiple displays)
-4. **Choose font size** (12pt - 240pt available)
-5. **Set padding** for spacing around text
-6. **Configure timer** or disable auto-hide
-7. **Click "Show Overlay"** to display your text
+3. **Configure settings** using the side-by-side controls:
+   - **Font Size**: Select from 12pt to 240pt (updates in real-time)
+   - **Position**: Choose corner placement (updates in real-time)
+   - **Padding**: Adjust spacing around text (updates in real-time)
+4. **Select monitor** from the dropdown (switches in real-time if multiple displays)
+5. **Configure timer** settings (apply in real-time)
+6. **Click "Show Overlay"** to display your text
+
+### Real-Time Features
+- ✅ **Font size changes**: Instant preview when adjusting size
+- ✅ **Position changes**: Overlay moves immediately when selecting new corner
+- ✅ **Padding adjustments**: Spacing updates as you type
+- ✅ **Monitor switching**: Overlay relocates instantly to new display
+- ✅ **Timer changes**: Auto-hide timer resets when you modify settings
+- ℹ️ **Message text**: Only updates when clicking "Show Overlay" (intentional)
 
 ### Advanced Features
 
 #### Timer Settings
-- ✅ **Enable timer**: Check "Auto-hide after" box
-- ⏱️ **Set duration**: Enter seconds in the timer field
+- ✅ **Enable timer**: Check "Auto-hide after" box (applies instantly)
+- ⏱️ **Set duration**: Enter seconds in the timer field (updates in real-time)
 - ♾️ **Persistent display**: Uncheck timer for manual control only
+- 🔄 **Smart updates**: Timer automatically resets when you change settings
 
 #### Font Size Options
 - **Small notifications**: 12-24pt
 - **Standard overlays**: 30-48pt  
 - **Large displays**: 60-96pt
 - **Massive text**: 120-240pt (perfect for projectors/large screens)
+- **Live preview**: See changes instantly as you adjust
 
-#### Monitor Selection
+#### Monitor & Position Management
 - **Automatic detection**: All connected monitors appear in dropdown
 - **Smart labeling**: Shows monitor name and resolution
-- **Easy switching**: Change monitors without restarting overlay
+- **Instant switching**: Change monitors and overlay moves immediately
+- **Corner positioning**: All 4 corners available with real-time updates
+- **Precise placement**: Overlay appears in correct position from the start
 
 ## 🎯 Use Cases
 
@@ -229,6 +246,19 @@ If you encounter any issues or have suggestions:
 - [ ] Keyboard shortcuts
 - [ ] Configuration file support
 - [ ] System tray integration
+- [ ] Animation effects
+- [ ] Custom positioning (not just corners)
+- [ ] Text formatting options (italics, underline)
+
+## 🎉 Recent Updates
+
+### v2.0 - Real-Time Experience
+- ✅ **Real-time updates** - All settings except message text update instantly
+- ✅ **Side-by-side layout** - Cleaner, more organized control interface
+- ✅ **Monitor switching** - Instant overlay relocation between displays
+- ✅ **Timer real-time** - Auto-hide settings apply immediately
+- ✅ **Improved positioning** - Accurate placement from the start
+- ✅ **Duplicate control removal** - Cleaner, streamlined interface
 
 ---
 
