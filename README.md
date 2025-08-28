@@ -17,7 +17,7 @@ A powerful and customizable Python application for creating text overlays on you
 ### 🖥️ **Multi-Monitor Support**
 - **Automatic monitor detection** - See all connected displays
 - **Smart monitor names** - Shows resolution and display names
-- **Flexible positioning** - Bottom-left corner placement by default
+- **Bottom-left corner positioning** - Consistent placement with margin from edges
 
 ### ⏱️ **Timer Controls**
 - **Auto-hide timer** - Set custom duration (default: 60 seconds)
