@@ -282,6 +282,10 @@ class OverlayApp:
                 padding = 40  # default padding if invalid input
                 
             self.label.pack(padx=padding, pady=padding)
+            
+            # Position the overlay immediately when first created
+            self.overlay.update_idletasks()
+            self.update_overlay_appearance()
         else:
             # Only update the text content (not real-time)
             self.label.config(text=self.entry.get())
