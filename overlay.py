@@ -442,27 +442,31 @@ class OverlayApp:
                 y_pos = selected_monitor.y + selected_monitor.height - req_height - margin
                 self.logger.warning(f"Unknown corner '{corner}', using bottom left")
 
-            self.logger.debug(f"Calculated position: ({x_pos}, {y_pos})")
+            # Clamp x_pos and y_pos to stay within monitor bounds
+            x_pos = max(selected_monitor.x, min(x_pos, selected_monitor.x + selected_monitor.width - req_width))
+            y_pos = max(selected_monitor.y, min(y_pos, selected_monitor.y + selected_monitor.height - req_height))
+
+            self.logger.debug(f"Clamped position: ({x_pos}, {y_pos})")
             self.logger.debug(f"Monitor bounds: x={selected_monitor.x}, y={selected_monitor.y}, w={selected_monitor.width}, h={selected_monitor.height}")
-            
+
             # Set geometry
             geometry_string = f"{req_width}x{req_height}+{x_pos}+{y_pos}"
             self.logger.debug(f"Setting geometry: {geometry_string}")
-            
+
             self.overlay.geometry(geometry_string)
             self.logger.debug("✓ Geometry set")
-            
+
             # Force immediate update to ensure positioning takes effect
             self.overlay.update()
             self.logger.debug("✓ Overlay update completed")
-            
+
             # Verify final position
             actual_x = self.overlay.winfo_x()
             actual_y = self.overlay.winfo_y()
             actual_width = self.overlay.winfo_width()
             actual_height = self.overlay.winfo_height()
             self.logger.info(f"Final overlay position: ({actual_x}, {actual_y}), size: {actual_width}x{actual_height}")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to position overlay: {e}")
 
