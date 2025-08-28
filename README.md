@@ -233,3 +233,5 @@ If you encounter any issues or have suggestions:
 ---
 
 **Made with ❤️ for the desktop overlay community**
+
+> ⚡ **Disclaimer**: This app was *vibe coded* - built with passion, creativity, and a "let's see what happens" attitude. It works great, but don't be surprised if you find some delightfully unconventional solutions! 🎨✨
