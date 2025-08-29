@@ -11,12 +11,7 @@ from screeninfo import get_monitors
 
 # Configure comprehensive logging
 def setup_logging():
-    "        self.timer_enabled_checkbox = tk.Checkbutton(
-            timer_frame, text="Auto-hide after", variable=self.timer_enabled, font=self.get_gui_font(), command=self.on_timer_change
-        )
-        self.timer_enabled_checkbox.pack(side=tk.LEFT)
-
-        self.timer_entry = tk.Entry(timer_frame, width=5, font=self.get_gui_font())up comprehensive logging for debugging Windows issues."""
+    """Set up comprehensive logging for debugging Windows issues."""
     
     # Create logs directory if it doesn't exist
     log_dir = "logs"
