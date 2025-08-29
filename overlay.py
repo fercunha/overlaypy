@@ -536,16 +536,9 @@ class OverlayApp:
                 self.overlay = tk.Toplevel(self.master)
                 self.logger.debug("✓ Toplevel window created")
                 
-                # Temporarily disable overrideredirect on Windows for debugging
-                if platform.system() == "Windows":
-                    # Try without overrideredirect first to see if window appears
-                    self.overlay.overrideredirect(False)
-                    self.logger.debug("✓ Override redirect set to FALSE (Windows debug mode)")
-                    # Add a title for debugging
-                    self.overlay.title("OverlayPy Debug")
-                else:
-                    self.overlay.overrideredirect(True)
-                    self.logger.debug("✓ Override redirect set to TRUE")
+                # Enable borderless window on all platforms
+                self.overlay.overrideredirect(True)
+                self.logger.debug("✓ Override redirect set to TRUE (borderless mode)")
                 
                 self.overlay.attributes("-topmost", True)
                 self.logger.debug("✓ Topmost attribute set")
@@ -636,7 +629,7 @@ class OverlayApp:
         except Exception as e:
             self.logger.error(f"Failed to schedule overlay updates: {e}")
 
-        # Make overlay click-through (Windows only) - Make this optional for debugging
+        # Make overlay click-through (Windows only)
         if platform.system() == "Windows":
             self.logger.info("Attempting to enable Windows click-through feature...")
             try:
@@ -652,9 +645,9 @@ class OverlayApp:
                     current_style = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
                     self.logger.debug(f"Current window style: 0x{current_style:x}")
                     
-                    # Try a less aggressive approach first - just WS_EX_LAYERED without transparent
-                    new_style = current_style | 0x80000  # WS_EX_LAYERED only
-                    self.logger.debug(f"New window style (layered only): 0x{new_style:x}")
+                    # WS_EX_LAYERED (0x80000) | WS_EX_TRANSPARENT (0x20) for full click-through
+                    new_style = current_style | 0x80000 | 0x20
+                    self.logger.debug(f"New window style (with click-through): 0x{new_style:x}")
                     
                     result = ctypes.windll.user32.SetWindowLongW(hwnd, -20, new_style)
                     self.logger.debug(f"SetWindowLongW result: {result}")
@@ -663,7 +656,7 @@ class OverlayApp:
                         error_code = ctypes.windll.kernel32.GetLastError()
                         self.logger.warning(f"SetWindowLongW returned 0, error code: {error_code}")
                     else:
-                        self.logger.info("✓ Layered window feature enabled successfully")
+                        self.logger.info("✓ Click-through feature enabled successfully")
                         
                         # Force window to be visible and on top
                         ctypes.windll.user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)
