@@ -11,7 +11,12 @@ from screeninfo import get_monitors
 
 # Configure comprehensive logging
 def setup_logging():
-    """Set up comprehensive logging for debugging Windows issues."""
+    "        self.timer_enabled_checkbox = tk.Checkbutton(
+            timer_frame, text="Auto-hide after", variable=self.timer_enabled, font=self.get_gui_font(), command=self.on_timer_change
+        )
+        self.timer_enabled_checkbox.pack(side=tk.LEFT)
+
+        self.timer_entry = tk.Entry(timer_frame, width=5, font=self.get_gui_font())up comprehensive logging for debugging Windows issues."""
     
     # Create logs directory if it doesn't exist
     log_dir = "logs"
@@ -100,11 +105,17 @@ class OverlayApp:
         master.title("Overlay Controller")
         master.geometry("450x500")
         
+        # GUI font size control
+        self.gui_font_size = 11  # Default GUI font size
+        
         try:
             master.attributes("-topmost", True)  # Keep main window always on top
             self.logger.info("✓ Main window set to topmost")
         except Exception as e:
             self.logger.error(f"Failed to set main window topmost: {e}")
+
+        # Bind keyboard shortcuts for font size control
+        self.setup_keyboard_shortcuts()
 
         # Create main frame with scrollbar
         self.logger.debug("Creating main UI components...")
@@ -166,9 +177,15 @@ class OverlayApp:
         # Use scrollable_frame as the parent for all widgets
         container = scrollable_frame
 
+        # --- Help Text ---
+        help_text = "Keyboard shortcuts: Ctrl+/Ctrl- (or Cmd+/Cmd- on Mac) to adjust GUI size"
+        if platform.system() == "Darwin":
+            help_text = help_text.replace("Ctrl", "Cmd")
+        tk.Label(container, text=help_text, font=self.get_gui_font(), fg="gray").pack(pady=(5, 10))
+
         # --- Message Input ---
-        tk.Label(container, text="Message:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
-        self.entry = tk.Entry(container, width=40, font=("Arial", 14))
+        tk.Label(container, text="Message:", font=self.get_gui_font(bold=True)).pack(pady=(10, 2))
+        self.entry = tk.Entry(container, width=40, font=self.get_gui_entry_font())
         self.entry.pack(padx=10, pady=(0, 10))
         self.entry.insert(0, "Your message here...")
 
@@ -179,7 +196,7 @@ class OverlayApp:
         # Font Size Column
         font_col = tk.Frame(controls_frame)
         font_col.pack(side=tk.LEFT, padx=(0, 15), fill=tk.X, expand=True)
-        tk.Label(font_col, text="Font Size:", font=("Arial", 11, "bold")).pack()
+        tk.Label(font_col, text="Font Size:", font=self.get_gui_font(bold=True)).pack()
         self.font_size_var = tk.StringVar(container)
         font_sizes = [
             "12",
@@ -208,7 +225,7 @@ class OverlayApp:
         # Position Column
         position_col = tk.Frame(controls_frame)
         position_col.pack(side=tk.LEFT, padx=(0, 15), fill=tk.X, expand=True)
-        tk.Label(position_col, text="Position:", font=("Arial", 11, "bold")).pack()
+        tk.Label(position_col, text="Position:", font=self.get_gui_font(bold=True)).pack()
         self.corner_var = tk.StringVar(container)
         corners = ["Bottom Left", "Bottom Right", "Top Left", "Top Right", "Center"]
         self.corner_var.set("Bottom Left")  # Default position
@@ -219,8 +236,8 @@ class OverlayApp:
         # Padding Column
         padding_col = tk.Frame(controls_frame)
         padding_col.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        tk.Label(padding_col, text="Padding (px):", font=("Arial", 11, "bold")).pack()
-        self.padding_entry = tk.Entry(padding_col, width=8, font=("Arial", 12), justify="center")
+        tk.Label(padding_col, text="Padding (px):", font=self.get_gui_font(bold=True)).pack()
+        self.padding_entry = tk.Entry(padding_col, width=8, font=self.get_gui_font(), justify="center")
         self.padding_entry.pack(fill=tk.X)
         self.padding_entry.insert(0, "40")
         # Bind real-time updates for padding
@@ -232,20 +249,20 @@ class OverlayApp:
 
         self.timer_enabled = tk.BooleanVar(value=True)
         self.timer_checkbox = tk.Checkbutton(
-            timer_frame, text="Auto-hide after", variable=self.timer_enabled, font=("Arial", 11), command=self.on_timer_change
+            timer_frame, text="Auto-hide after", variable=self.timer_enabled, font=self.get_gui_font(), command=self.on_timer_change
         )
         self.timer_checkbox.pack(side=tk.LEFT)
 
-        self.timer_entry = tk.Entry(timer_frame, width=5, font=("Arial", 12))
+        self.timer_entry = tk.Entry(timer_frame, width=5, font=self.get_gui_font())
         self.timer_entry.pack(side=tk.LEFT, padx=(5, 2))
         self.timer_entry.insert(0, "60")
         # Bind real-time updates for timer
         self.timer_entry.bind("<KeyRelease>", self.on_timer_change)
 
-        tk.Label(timer_frame, text="seconds", font=("Arial", 11)).pack(side=tk.LEFT)
+        tk.Label(timer_frame, text="seconds", font=self.get_gui_font()).pack(side=tk.LEFT)
 
         # --- Monitor Selection ---
-        tk.Label(container, text="Select Monitor:", font=("Arial", 12, "bold")).pack(pady=(10, 2))
+        tk.Label(container, text="Select Monitor:", font=self.get_gui_font(bold=True)).pack(pady=(10, 2))
         
         self.logger.info("Detecting monitors...")
         try:
@@ -320,20 +337,103 @@ class OverlayApp:
         self.toggle_btn = tk.Button(
             container,
             text="Show Overlay",
-            font=("Arial", 12, "bold"),
+            font=self.get_gui_font(bold=True),
             bg="lightgreen",
             fg="black",
             command=self.toggle_overlay,
         )
         self.toggle_btn.pack(pady=5)
 
-        self.quit_btn = tk.Button(container, text="Quit", font=("Arial", 12), bg="lightcoral", fg="black", command=master.quit)
+        self.quit_btn = tk.Button(container, text="Quit", font=self.get_gui_font(), bg="lightcoral", fg="black", command=master.quit)
         self.quit_btn.pack(pady=(5, 20))  # Extra bottom padding
 
         # Overlay state
         self.overlay = None
         self.overlay_visible = False
         self.timer_job = None  # Store timer job reference
+
+    def setup_keyboard_shortcuts(self):
+        """Set up keyboard shortcuts for GUI font size control."""
+        # Platform-specific modifier key
+        if platform.system() == "Darwin":  # macOS
+            modifier = "Command"
+        else:  # Windows/Linux
+            modifier = "Control"
+        
+        # Bind keyboard shortcuts
+        self.master.bind(f"<{modifier}-equal>", self.increase_gui_font)  # Ctrl/Cmd + =
+        self.master.bind(f"<{modifier}-plus>", self.increase_gui_font)   # Ctrl/Cmd + +
+        self.master.bind(f"<{modifier}-minus>", self.decrease_gui_font)  # Ctrl/Cmd + -
+        
+        # Make sure the window can receive focus for key events
+        self.master.focus_set()
+        
+        self.logger.debug(f"✓ Keyboard shortcuts set up with {modifier} modifier")
+
+    def increase_gui_font(self, event=None):
+        """Increase GUI font size."""
+        if self.gui_font_size < 20:  # Maximum font size
+            self.gui_font_size += 1
+            self.update_gui_fonts()
+            self.logger.debug(f"GUI font size increased to {self.gui_font_size}")
+
+    def decrease_gui_font(self, event=None):
+        """Decrease GUI font size."""
+        if self.gui_font_size > 8:  # Minimum font size
+            self.gui_font_size -= 1
+            self.update_gui_fonts()
+            self.logger.debug(f"GUI font size decreased to {self.gui_font_size}")
+
+    def update_gui_fonts(self):
+        """Update all GUI element fonts to the current size."""
+        try:
+            # Create the font tuple
+            gui_font = ("Arial", self.gui_font_size)
+            bold_font = ("Arial", self.gui_font_size, "bold")
+            
+            # Update all labels and buttons
+            for widget in self.master.winfo_children():
+                self.update_widget_fonts(widget, gui_font, bold_font)
+                
+            self.logger.debug(f"✓ Updated all GUI fonts to size {self.gui_font_size}")
+        except Exception as e:
+            self.logger.error(f"Failed to update GUI fonts: {e}")
+
+    def update_widget_fonts(self, widget, gui_font, bold_font):
+        """Recursively update fonts for a widget and its children."""
+        try:
+            # Update current widget if it has a font
+            if hasattr(widget, 'config'):
+                if isinstance(widget, (tk.Label, tk.Button)):
+                    # Check if it should be bold
+                    current_font = widget.cget('font')
+                    if isinstance(current_font, tuple) and len(current_font) >= 3 and 'bold' in current_font:
+                        widget.config(font=bold_font)
+                    else:
+                        widget.config(font=gui_font)
+                elif isinstance(widget, (tk.Entry, ttk.Entry)):
+                    widget.config(font=gui_font)
+                elif isinstance(widget, (tk.OptionMenu, ttk.OptionMenu)):
+                    widget.config(font=gui_font)
+            
+            # Recursively update children
+            for child in widget.winfo_children():
+                self.update_widget_fonts(child, gui_font, bold_font)
+                
+        except Exception as e:
+            # Ignore widgets that don't support font changes
+            pass
+
+    def get_gui_font(self, bold=False):
+        """Get the current GUI font tuple."""
+        if bold:
+            return ("Arial", self.gui_font_size, "bold")
+        else:
+            return ("Arial", self.gui_font_size)
+
+    def get_gui_entry_font(self):
+        """Get a slightly larger font for entry widgets."""
+        return ("Arial", self.gui_font_size + 2)
 
     def on_setting_change(self, event=None):
         """Called when font size, position, or padding changes - updates overlay in real-time"""
