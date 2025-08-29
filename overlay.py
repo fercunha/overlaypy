@@ -291,8 +291,22 @@ class OverlayApp:
                 monitor_names.append(f"Monitor {i + 1} (Unknown)")
 
         if monitor_names:
-            self.monitor_var.set(monitor_names[0])
-            self.logger.info(f"✓ Default monitor set to: {monitor_names[0]}")
+            # Try to set primary monitor as default
+            primary_monitor_name = None
+            for i, monitor in enumerate(self.monitors):
+                if hasattr(monitor, 'is_primary') and monitor.is_primary:
+                    if hasattr(monitor, "name") and monitor.name:
+                        primary_monitor_name = f"{monitor.name} ({monitor.width}x{monitor.height})"
+                    else:
+                        primary_monitor_name = f"Monitor {i + 1} ({monitor.width}x{monitor.height})"
+                    break
+            
+            if primary_monitor_name and primary_monitor_name in monitor_names:
+                self.monitor_var.set(primary_monitor_name)
+                self.logger.info(f"✓ Default monitor set to primary: {primary_monitor_name}")
+            else:
+                self.monitor_var.set(monitor_names[0])
+                self.logger.info(f"✓ Default monitor set to: {monitor_names[0]}")
         else:
             self.monitor_var.set("No monitors detected")
             self.logger.error("No monitor names available for dropdown")
@@ -374,8 +388,15 @@ class OverlayApp:
                 break
 
         if selected_monitor is None:
-            selected_monitor = self.monitors[0]
-            self.logger.warning(f"No matching monitor for positioning, using default: {selected_monitor}")
+            # Try to find the primary monitor first
+            primary_monitor = None
+            for monitor in self.monitors:
+                if hasattr(monitor, 'is_primary') and monitor.is_primary:
+                    primary_monitor = monitor
+                    break
+            
+            selected_monitor = primary_monitor if primary_monitor else self.monitors[0]
+            self.logger.warning(f"No matching monitor for positioning, using primary/default: {selected_monitor}")
 
         # Get current font size
         try:
