@@ -536,11 +536,29 @@ class OverlayApp:
                 self.overlay = tk.Toplevel(self.master)
                 self.logger.debug("✓ Toplevel window created")
                 
-                self.overlay.overrideredirect(True)
-                self.logger.debug("✓ Override redirect set")
+                # Temporarily disable overrideredirect on Windows for debugging
+                if platform.system() == "Windows":
+                    # Try without overrideredirect first to see if window appears
+                    self.overlay.overrideredirect(False)
+                    self.logger.debug("✓ Override redirect set to FALSE (Windows debug mode)")
+                    # Add a title for debugging
+                    self.overlay.title("OverlayPy Debug")
+                else:
+                    self.overlay.overrideredirect(True)
+                    self.logger.debug("✓ Override redirect set to TRUE")
                 
                 self.overlay.attributes("-topmost", True)
                 self.logger.debug("✓ Topmost attribute set")
+                
+                # Windows-specific visibility attributes
+                if platform.system() == "Windows":
+                    try:
+                        self.overlay.attributes("-alpha", 0.95)  # Slight transparency to ensure visibility
+                        self.overlay.attributes("-disabled", False)  # Ensure window is enabled
+                        self.overlay.attributes("-toolwindow", True)  # Tool window style
+                        self.logger.debug("✓ Windows-specific attributes set")
+                    except Exception as e:
+                        self.logger.warning(f"Could not set Windows attributes: {e}")
                 
                 self.overlay.configure(bg="black")
                 self.logger.debug("✓ Background color configured")
@@ -618,7 +636,7 @@ class OverlayApp:
         except Exception as e:
             self.logger.error(f"Failed to schedule overlay updates: {e}")
 
-        # Make overlay click-through (Windows only)
+        # Make overlay click-through (Windows only) - Make this optional for debugging
         if platform.system() == "Windows":
             self.logger.info("Attempting to enable Windows click-through feature...")
             try:
@@ -634,9 +652,9 @@ class OverlayApp:
                     current_style = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
                     self.logger.debug(f"Current window style: 0x{current_style:x}")
                     
-                    # WS_EX_LAYERED (0x80000) | WS_EX_TRANSPARENT (0x20)
-                    new_style = current_style | 0x80000 | 0x20
-                    self.logger.debug(f"New window style: 0x{new_style:x}")
+                    # Try a less aggressive approach first - just WS_EX_LAYERED without transparent
+                    new_style = current_style | 0x80000  # WS_EX_LAYERED only
+                    self.logger.debug(f"New window style (layered only): 0x{new_style:x}")
                     
                     result = ctypes.windll.user32.SetWindowLongW(hwnd, -20, new_style)
                     self.logger.debug(f"SetWindowLongW result: {result}")
@@ -645,9 +663,17 @@ class OverlayApp:
                         error_code = ctypes.windll.kernel32.GetLastError()
                         self.logger.warning(f"SetWindowLongW returned 0, error code: {error_code}")
                     else:
-                        self.logger.info("✓ Click-through feature enabled successfully")
+                        self.logger.info("✓ Layered window feature enabled successfully")
+                        
+                        # Force window to be visible and on top
+                        ctypes.windll.user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)
+                        self.logger.debug("✓ SetWindowPos called to ensure visibility")
                 else:
                     self.logger.warning("GetParent returned 0 (no parent window)")
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to set up Windows click-through: {e}")
+                # Continue without click-through functionality
                     
             except Exception as e:
                 # Click-through feature failed, but overlay still works
@@ -689,6 +715,16 @@ class OverlayApp:
         """Helper method for delayed overlay display with logging."""
         try:
             if self.overlay:
+                # Force focus and visibility on Windows
+                if platform.system() == "Windows":
+                    try:
+                        # Additional Windows-specific visibility calls
+                        self.overlay.lift()
+                        self.overlay.focus_force()
+                        self.logger.debug("✓ Windows lift() and focus_force() called")
+                    except Exception as e:
+                        self.logger.warning(f"Windows visibility calls failed: {e}")
+                
                 self.overlay.deiconify()
                 self.logger.info("✓ Overlay window displayed (deiconify)")
                 
@@ -699,6 +735,15 @@ class OverlayApp:
                 width = self.overlay.winfo_width()
                 height = self.overlay.winfo_height()
                 self.logger.info(f"Final overlay position: ({x}, {y}), size: {width}x{height}")
+                
+                # Additional visibility check on Windows
+                if platform.system() == "Windows":
+                    try:
+                        visible = self.overlay.winfo_viewable()
+                        mapped = self.overlay.winfo_ismapped()
+                        self.logger.info(f"Window visibility check - viewable: {visible}, mapped: {mapped}")
+                    except Exception as e:
+                        self.logger.warning(f"Visibility check failed: {e}")
             else:
                 self.logger.error("Overlay is None in _show_overlay_delayed")
         except Exception as e:
