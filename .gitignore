@@ -221,3 +221,7 @@ vulture.whitelist
 
 # Development tools
 .pre-commit-config.yaml
+/release
+10.0.0
+2.38.0
+6.0.0
