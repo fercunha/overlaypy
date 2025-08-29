@@ -210,7 +210,7 @@ class OverlayApp:
         position_col.pack(side=tk.LEFT, padx=(0, 15), fill=tk.X, expand=True)
         tk.Label(position_col, text="Position:", font=("Arial", 11, "bold")).pack()
         self.corner_var = tk.StringVar(container)
-        corners = ["Bottom Left", "Bottom Right", "Top Left", "Top Right"]
+        corners = ["Bottom Left", "Bottom Right", "Top Left", "Top Right", "Center"]
         self.corner_var.set("Bottom Left")  # Default position
         self.corner_menu = tk.OptionMenu(position_col, self.corner_var, *corners, command=self.on_setting_change)
         self.corner_menu.config(width=10)
@@ -458,6 +458,9 @@ class OverlayApp:
             elif corner == "Top Right":
                 x_pos = selected_monitor.x + selected_monitor.width - req_width - margin
                 y_pos = selected_monitor.y + margin
+            elif corner == "Center":
+                x_pos = selected_monitor.x + (selected_monitor.width - req_width) // 2
+                y_pos = selected_monitor.y + (selected_monitor.height - req_height) // 2
             else:  # Default to bottom left if something goes wrong
                 x_pos = selected_monitor.x + margin
                 y_pos = selected_monitor.y + selected_monitor.height - req_height - margin
